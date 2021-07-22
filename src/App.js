@@ -121,7 +121,7 @@ class BooksApp extends React.Component {
           value={option.value}
           key={option.value}
           disabled={option.value === shelf || option.value === 'move'}
-          selected={option.value === shelf}
+          selected={option.value === shelf || (option.value === 'none' && !shelf)}
         >
           {option.label}
         </option>
