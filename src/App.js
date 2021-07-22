@@ -66,17 +66,26 @@ class BooksApp extends React.Component {
 
 
 
-
+    book.shelf = shelf
     this.setState((currentState) => ({
-      books: [...new_books]
+      books: currentState.books.filter(b => b.id !== book.id).concat(book)
 
     }
     ))
 
   }
 
-  searchBooks = (term) => {
-    return this.state.books.filter(book => book.title.toLowerCase().includes(term.toLowerCase()) || book.authors.find(el => el.toLowerCase().includes(term.toLowerCase())))
+  searchBooks = async (term) => {
+    // return this.state.books.filter(book => book.title.toLowerCase().includes(term.toLowerCase()) || book.authors.find(el => el.toLowerCase().includes(term.toLowerCase())))
+    console.log("searchBooks " + term)
+    let result = await BooksAPI.search(term).then((res) => {
+      console.log("searchBooks promise success " + res)
+      return res
+    }).catch(err => console.log(err))
+    console.log("result: " + result)
+    let found = result["error"] ? false : true
+    console.log("Found results??? " + found)
+    return found ? result : []
   }
 
 
@@ -131,11 +140,11 @@ class BooksApp extends React.Component {
       return book.shelf === shelf
     }).map(book => {
       return (<li
-        key={book.industryIdentifiers[0].identifier}
+        key={book.industryIdentifiers[0]?.identifier}
       >
         <div className="book">
           <div className="book-top">
-            <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${book.imageLinks.smallThumbnail})` }}></div>
+            <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${book.imageLinks?.smallThumbnail})` }}></div>
             <div className="book-shelf-changer">
               <select
                 onChange={(event) => {
@@ -147,7 +156,7 @@ class BooksApp extends React.Component {
           </div>
           <div className="book-title"> {book.title}</div>
           {
-            book.authors.map((author) => {
+            book.authors?.map((author) => {
               return (
                 <div className="book-authors" key={author}>{author}</div>
               )

@@ -46,25 +46,28 @@ class SearchArea extends React.Component {
         )
     }
 
-    searchTerm = (term) => {
+    searchTerm = async (term) => {
+        console.log("inside searchTerm (" + term + ")")
         this.setState({
             query: term
         })
 
-        let results = this.props.searchBooks(term)
-        this.setState({
-            searchResults: results
-        })
+        await this.props.searchBooks(term).then(res => {
+            console.log("searchTerm promise success " + res)
+            this.setState({
+                searchResults: res
+            })
+        }).catch(err => console.log(err))
 
     }
 
 
     resultsList = () => {
-
-        return this.state.searchResults.map(book => {
+        console.log("ugh" + this.state.searchResults)
+        return this.state.searchResults?.map(book => {
             return <div className="book">
                 <div className="book-top">
-                    <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${book.imageLinks.smallThumbnail})` }}></div>
+                    <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${book.imageLinks?.smallThumbnail})` }}></div>
                     <div className="book-shelf-changer">
                         <select
                             onChange={(event) => {
@@ -76,7 +79,7 @@ class SearchArea extends React.Component {
                 </div>
                 <div className="book-title"> {book.title}</div>
                 {
-                    book.authors.map((author) => {
+                    book.authors?.map((author) => {
                         return (
                             <div className="book-authors" key={author}>{author}</div>
                         )
