@@ -4,9 +4,12 @@ import './App.css'
 import './App'
 import { Link } from "react-router-dom";
 
-class Book extends React.Component {
+class Book extends PureComponent {
 
+    constructor(props) {
+        super(props)
 
+    }
 
 
     render() {
