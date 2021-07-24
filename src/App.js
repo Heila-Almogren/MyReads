@@ -3,7 +3,6 @@ import * as BooksAPI from './BooksAPI'
 import './App.css'
 import BooksList from './BooksList'
 import { Route } from "react-router-dom";
-import { Link } from "react-router-dom";
 import SearchArea from './searchArea'
 
 class BooksApp extends React.Component {
@@ -56,16 +55,6 @@ class BooksApp extends React.Component {
   moveBook = (book, shelf) => {
     BooksAPI.update(book, shelf)
 
-    let index = this.state.books.findIndex(elm => book.id === elm.id)
-
-    let new_books = [
-      ...this.state.books.slice(0, index),
-      ...[Object.assign({}, this.state.books[index], { shelf: shelf })],
-      ...this.state.books.slice(index + 1)
-    ]
-
-
-
     book.shelf = shelf
     this.setState((currentState) => ({
       books: currentState.books.filter(b => b.id !== book.id).concat(book)
@@ -77,19 +66,15 @@ class BooksApp extends React.Component {
 
   searchBooks = async (term) => {
     // return this.state.books.filter(book => book.title.toLowerCase().includes(term.toLowerCase()) || book.authors.find(el => el.toLowerCase().includes(term.toLowerCase())))
-    console.log("searchBooks " + term)
     let result = await BooksAPI.search(term).then((res) => {
-      console.log("searchBooks promise success " + res)
       return res
     }).catch(err => console.log(err))
-    console.log("result: " + result)
     let found = result["error"] ? false : true
-    console.log("Found results??? " + found)
     return found ? result : []
   }
 
 
-  getOptions = (shelf) => {
+  getOptions = (book, shelf) => {
     let options = [
       {
         label: 'Move to...',
@@ -112,26 +97,53 @@ class BooksApp extends React.Component {
         value: 'none'
       }
 
-
     ]
 
+    let index = this.getBookIndex(book)
+
+
     return (
-      options.map(option => {
-        return <option
-          value={option.value}
-          key={option.value}
-          disabled={option.value === shelf || option.value === 'move'}
-          selected={option.value === shelf || (option.value === 'none' && !shelf)}
-        >
-          {option.label}
-        </option>
-      })
+      <div>
+        <select
+          onChange={(event) => {
+            this.moveBook(book, event.target.value)
+          }
+          }
+
+          defaultValue={index > -1 ? this.state.books[index].shelf : "none"}>
+
+          {
+            options.map(option => {
+              return (
+                <option
+                  value={option.value}
+                  key={option.value}
+                  disabled={option.value === shelf || option.value === 'move'}
+                >
+                  {option.label}
+                </option>
+              )
+
+            })
+          }
+
+        </select>
+
+      </div>
+
+
     )
-
-
   }
 
 
+
+  getBookIndex(book) {
+    let index = this.state.books.findIndex(b => {
+      return b.industryIdentifiers[0]?.identifier === book.industryIdentifiers[0]?.identifier
+    })
+
+    return index
+  }
 
 
   listAllBooks(shelf) {
@@ -146,12 +158,9 @@ class BooksApp extends React.Component {
           <div className="book-top">
             <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${book.imageLinks?.smallThumbnail})` }}></div>
             <div className="book-shelf-changer">
-              <select
-                onChange={(event) => {
-                  this.moveBook(book, event.target.value)
-                }}>
-                {this.getOptions(shelf)}
-              </select>
+
+
+              {this.getOptions(book, shelf)}
             </div>
           </div>
           <div className="book-title"> {book.title}</div>
@@ -171,4 +180,3 @@ class BooksApp extends React.Component {
 }
 
 export default BooksApp
-// JSON.stringify(book)

@@ -1,5 +1,4 @@
 import React from 'react'
-import * as BooksAPI from './BooksAPI'
 import './App.css'
 import './App'
 import { Link } from "react-router-dom";
@@ -33,7 +32,7 @@ class SearchArea extends React.Component {
                     </div>
                 </div>
 
-                {this.state.query != '' && (
+                {this.state.query !== '' && (
                     <div className="search-books-results">
                         <ol className="books-grid">
                             {this.resultsList()}
@@ -47,13 +46,11 @@ class SearchArea extends React.Component {
     }
 
     searchTerm = async (term) => {
-        console.log("inside searchTerm (" + term + ")")
         this.setState({
             query: term
         })
 
         await this.props.searchBooks(term).then(res => {
-            console.log("searchTerm promise success " + res)
             this.setState({
                 searchResults: res
             })
@@ -63,18 +60,14 @@ class SearchArea extends React.Component {
 
 
     resultsList = () => {
-        console.log("ugh" + this.state.searchResults)
+
         return this.state.searchResults?.map(book => {
-            return <div className="book">
+
+            return <div className="book" key={book.industryIdentifiers[0]?.identifier}>
                 <div className="book-top">
                     <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${book.imageLinks?.smallThumbnail})` }}></div>
                     <div className="book-shelf-changer">
-                        <select
-                            onChange={(event) => {
-                                this.props.moveBook(book, event.target.value)
-                            }}>
-                            {this.props.getOptions(book.shelf)}
-                        </select>
+                        {this.props.getOptions(book, book.shelf)}
                     </div>
                 </div>
                 <div className="book-title"> {book.title}</div>
@@ -84,6 +77,8 @@ class SearchArea extends React.Component {
                             <div className="book-authors" key={author}>{author}</div>
                         )
                     })
+
+
                 }
 
             </div>
